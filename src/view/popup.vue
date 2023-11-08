@@ -26,7 +26,10 @@
 </template>
 
 <script lang="ts">
-import { getAllBlobsFromIndexedDB } from "../helpers/dbRequests";
+import {
+  getAllBlobsFromIndexedDB,
+  getBlobFromIndexedDB,
+} from "../helpers/dbRequests";
 import BlobDownload from "../components/BlobDownload.vue";
 import Button from "../components/Button.vue";
 
@@ -40,6 +43,7 @@ export default {
     return {
       recording: false,
       mediaStreams: [] as Blob[],
+      dataFromContent: Blob,
     };
   },
   methods: {
@@ -59,9 +63,36 @@ export default {
         this.mediaStreams = blobs;
       });
     },
+    getLastBlob() {
+      getBlobFromIndexedDB(
+        this.mediaStreams.length + 1,
+        (retrievedBlob: Blob | null) => {
+          if (retrievedBlob) {
+            this.mediaStreams.push(retrievedBlob);
+          } else {
+            console.error("Blob with that key does not exist");
+          }
+        }
+      );
+    },
   },
   mounted() {
     this.getBlobs();
+  },
+  created() {
+    // Listen for messages from the content script to show added video;
+    chrome.runtime.onMessage.addListener((message) => {
+      if (message.action === "blobAdded") {
+        this.dataFromContent = message.data;
+      }
+    });
+  },
+  watch: {
+    dataFromContent(newData) {
+      if (newData !== null) {
+        this.getLastBlob();
+      }
+    },
   },
 };
 </script>

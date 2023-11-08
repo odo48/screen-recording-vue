@@ -106,6 +106,7 @@ export const addBlobToIndexedDB = (blob: Blob) => {
     const addRequest: IDBRequest = objectStore.add(data);
 
     addRequest.onsuccess = () => {
+      chrome.runtime.sendMessage({ action: "blobAdded", data: blob });
       alert(
         "Video recording added successfully. Please open the extension to preview"
       );
@@ -119,5 +120,39 @@ export const addBlobToIndexedDB = (blob: Blob) => {
 
   request.onerror = () => {
     alert(`ERROR: ${request.error}`);
+  };
+};
+
+export const getBlobFromIndexedDB = (
+  key: number,
+  callback: (blob: Blob | null) => void
+) => {
+  const request: IDBOpenDBRequest = indexedDB.open(dbName, dbVersion);
+
+  request.onsuccess = () => {
+    const db: IDBDatabase = request.result as IDBDatabase;
+
+    // Create a transaction for read-only access
+    const transaction: IDBTransaction = db.transaction(
+      objectStoreName,
+      "readonly"
+    );
+
+    // Get the object store
+    const objectStore: IDBObjectStore =
+      transaction.objectStore(objectStoreName);
+
+    // Retrieve the Blob by key
+    const getRequest: IDBRequest = objectStore.get(key);
+
+    getRequest.onsuccess = () => {
+      const result: { blobData: Blob } | undefined = getRequest.result;
+
+      if (result) {
+        callback(result.blobData);
+      } else {
+        callback(null);
+      }
+    };
   };
 };

@@ -1,7 +1,5 @@
-chrome.runtime.onMessage.addListener((message) => {
-  if (message.action === "startScreenRecording") {
-    // Start screen recording
-  } else if (message.action === "stopScreenRecording") {
-    // Stop screen recording
+chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+  if (message.action === "blobAdded") {
+    // Handle the message, e.g., display the item in your extension UI
   }
 });

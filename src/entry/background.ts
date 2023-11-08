@@ -4,13 +4,9 @@ let localWebcamStream: MediaStream;
 chrome.runtime.onMessage.addListener((message) => {
   if (message.action === "startScreenRecording") {
     startScreenRecording();
-  }
-
-  if (message.action === "startWebcamRecording") {
+  } else if (message.action === "startWebcamRecording") {
     startWebcamRecording();
-  }
-
-  if (message.action === "stopWebcamRecording") {
+  } else if (message.action === "stopWebcamRecording") {
     stopWebcamRecording();
   }
 });
