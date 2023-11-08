@@ -9,18 +9,21 @@
         Screen Webcam Recording
       </Button>
       <Button @click="this.stopRecording" :disabled="!recording"> Stop </Button>
-      <div class="popup__container-subtitle" v-if="mediaStreams.length > 0">
-        List of media streams:
+
+      <p class="popup__container-recording" v-if="recording">Recording...</p>
+      <div v-else>
+        <div class="popup__container-subtitle" v-if="mediaStreams.length > 0">
+          List of media streams:
+        </div>
+        <div class="popup__container-blobs">
+          <BlobDownload
+            v-for="(mediaStream, index) in mediaStreams"
+            :key="index"
+            :index="index"
+            :blob="mediaStream"
+          />
+        </div>
       </div>
-      <div class="popup__container-blobs">
-        <BlobDownload
-          v-for="(mediaStream, index) in mediaStreams"
-          :key="index"
-          :index="index"
-          :blob="mediaStream"
-        />
-      </div>
-      <p v-if="recording">Recording...</p>
     </div>
   </div>
 </template>
@@ -113,6 +116,7 @@ export default {
   }
 
   &__container {
+    position: relative;
     width: 350px;
     padding: 32px 16px;
     display: flex;
@@ -133,6 +137,12 @@ export default {
       max-height: 250px;
       overflow: auto;
       padding-right: 16px;
+    }
+
+    &-recording {
+      font-size: 18px;
+      position: absolute;
+      bottom: 0;
     }
   }
 }
