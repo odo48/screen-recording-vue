@@ -1,17 +1,37 @@
-const dbName = "recordingDB1";
-const objectStoreName = "recordingStore1";
-const dbVersion = 2;
+const dbName = process.env.VUE_APP_DB_NAME;
+const dbVersion = process.env.VUE_APP_DB_VERSION;
+const objectStoreName = process.env.VUE_APP_OBJECT_STORE_NAME;
 
 export function getAllBlobsFromIndexedDB(
   callback: (blobs: Blob[]) => void
 ): void {
   const request: IDBOpenDBRequest = indexedDB.open(dbName, dbVersion);
 
+  request.onupgradeneeded = () => {
+    const db: IDBDatabase = request.result as IDBDatabase;
+
+    // Define the object store if it doesn't exist
+    if (!db.objectStoreNames.contains(objectStoreName)) {
+      const objectStore: IDBObjectStore = db.createObjectStore(
+        objectStoreName,
+        {
+          keyPath: "id",
+          autoIncrement: true,
+        }
+      );
+
+      // Set up the structure of the object store
+      objectStore.createIndex("blobData", "blobData", { unique: false });
+    }
+  };
+
   request.onsuccess = () => {
     const db: IDBDatabase = request.result as IDBDatabase;
+
     const blobs: Blob[] = [];
 
     if (!db.objectStoreNames.contains(objectStoreName)) {
+      db.close();
       return;
     }
 
@@ -69,27 +89,6 @@ export const addBlobToIndexedDB = (blob: Blob) => {
   request.onsuccess = () => {
     const db: IDBDatabase = request.result as IDBDatabase;
 
-    if (!db.objectStoreNames.contains(objectStoreName)) {
-      const newDBVersion = db.version + 1;
-      db.close();
-
-      const newRequest = indexedDB.open(dbName, newDBVersion);
-      newRequest.onupgradeneeded = () => {
-        const upgradedDB = newRequest.result;
-
-        const objectStore: IDBObjectStore = upgradedDB.createObjectStore(
-          objectStoreName,
-          {
-            keyPath: "id",
-            autoIncrement: true,
-          }
-        );
-
-        // Set up the structure of the object store
-        objectStore.createIndex("blobData", "blobData", { unique: false });
-      };
-    }
-
     // Create a transaction for read/write access
     const transaction: IDBTransaction = db.transaction(
       [objectStoreName],
@@ -107,7 +106,9 @@ export const addBlobToIndexedDB = (blob: Blob) => {
     const addRequest: IDBRequest = objectStore.add(data);
 
     addRequest.onsuccess = () => {
-      console.log("Blob added to IndexedDB");
+      alert(
+        "Video recording added successfully. Please open the extension to preview"
+      );
     };
 
     transaction.oncomplete = () => {

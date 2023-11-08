@@ -2,13 +2,13 @@
   <div class="popup">
     <div class="popup__title">Media Recorder Extension</div>
     <div class="popup__container">
-      <Button @click="startScreenRecording" :disabled="recording">
+      <Button @click="this.startScreenRecording" :disabled="recording">
         Screen Record
       </Button>
-      <Button @click="startWebcamRecording" :disabled="recording">
+      <Button @click="this.startWebcamRecording" :disabled="recording">
         Screen Webcam Recording
       </Button>
-      <Button @click="stopRecording" :disabled="!recording"> Stop </Button>
+      <Button @click="this.stopRecording" :disabled="!recording"> Stop </Button>
       <div class="popup__container-subtitle" v-if="mediaStreams.length > 0">
         List of media streams:
       </div>
