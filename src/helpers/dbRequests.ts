@@ -155,4 +155,8 @@ export const getBlobFromIndexedDB = (
       }
     };
   };
+
+  request.onerror = () => {
+    alert(`ERROR: ${request.error}`);
+  };
 };
